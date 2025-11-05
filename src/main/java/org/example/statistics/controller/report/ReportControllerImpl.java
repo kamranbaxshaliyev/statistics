@@ -1,40 +1,79 @@
 package org.example.statistics.controller.report;
 
+import lombok.RequiredArgsConstructor;
+import org.example.statistics.domain.Match;
+import org.example.statistics.domain.Player;
+import org.example.statistics.domain.Server;
+import org.example.statistics.repository.MatchRepository;
+import org.example.statistics.repository.PlayerRepository;
+import org.example.statistics.repository.ServerRepository;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @RestController
+@RequiredArgsConstructor
 public class ReportControllerImpl implements ReportController {
 
-	@Override
-	public ResponseEntity<?> getRecentMatches(Integer count) {
-		if (count == null) {
-			count = 5;
-		}
+	private final MatchRepository matchRepository;
+	private final PlayerRepository playerRepository;
+	private final ServerRepository serverRepository;
 
-		List<String> matches = List.of("Match1", "Match2", "Match3", "Match4", "Match5");
-		return ResponseEntity.ok(matches.subList(0, Math.min(count, matches.size())));
+	@Override
+	public ResponseEntity<List<Match>> getRecentMatches(Integer count) {
+		List<Match> allMatches = StreamSupport.stream(matchRepository.findAll().spliterator(), false)
+				.sorted(Comparator.comparing(Match::getTimestamp).reversed())
+				.limit(count)
+				.collect(Collectors.toList());
+
+		return ResponseEntity.ok(allMatches);
 	}
 
 	@Override
-	public ResponseEntity<?> getBestPlayers(Integer count) {
-		if (count == null) {
-			count = 5;
-		}
+	public ResponseEntity<List<Map<String, Object>>> getBestPlayers(Integer count) {
+		List<Player> allPlayers = StreamSupport.stream(playerRepository.findAll().spliterator(), false)
+				.sorted(Comparator.comparingInt(Player::getTotalScore).reversed())
+				.limit(count)
+				.toList();
 
-		List<String> players = List.of("PlayerA", "PlayerB", "PlayerC", "PlayerD", "PlayerE");
-		return ResponseEntity.ok(players.subList(0, Math.min(count, players.size())));
+		List<Map<String, Object>> bestPlayers = allPlayers.stream()
+				.map(p -> {
+					Map<String, Object> map = new HashMap<>();
+					map.put("name", p.getName());
+					map.put("totalScore", p.getTotalScore());
+					map.put("winRate", p.getWinRate() + "%");
+					return map;
+				})
+				.collect(Collectors.toList());
+
+		return ResponseEntity.ok(bestPlayers);
 	}
 
 	@Override
-	public ResponseEntity<?> getPopularServers(Integer count) {
-		if (count == null) {
-			count = 5;
-		}
+	public ResponseEntity<List<Map<String, Object>>> getPopularServers(Integer count) {
+		List<Server> allServers = StreamSupport.stream(serverRepository.findAll().spliterator(), false)
+				.sorted(Comparator.comparingInt((Server s) ->
+						s.getMatchIds() != null ? s.getMatchIds().size() : 0
+				).reversed())
+				.limit(count)
+				.toList();
 
-		List<String> servers = List.of("Server1", "Server2", "Server3", "Server4", "Server5");
-		return ResponseEntity.ok(servers.subList(0, Math.min(count, servers.size())));
+		List<Map<String, Object>> popularServers = allServers.stream()
+				.map(s -> Map.<String, Object>of(
+						"endpoint", s.getEndpoint(),
+						"name", s.getName(),
+						"region", s.getRegion(),
+						"matchesPlayed", s.getMatchIds() != null ? s.getMatchIds().size() : 0,
+						"rating", s.getRating()
+				))
+				.collect(Collectors.toList());
+
+		return ResponseEntity.ok(popularServers);
 	}
 }

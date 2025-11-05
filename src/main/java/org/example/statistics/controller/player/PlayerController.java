@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Map;
+
 @Tag(name = "Player", description = "Operations related to players")
 @RequestMapping("/players")
 public interface PlayerController
@@ -16,5 +18,5 @@ public interface PlayerController
 			description = "Retrieve detailed statistics for the specified player by name."
 	)
 	@GetMapping("/{name}/stats")
-	ResponseEntity<?> getStats(@PathVariable String name);
+	ResponseEntity<Map<String, Object>> getStats(@PathVariable String name);
 }
