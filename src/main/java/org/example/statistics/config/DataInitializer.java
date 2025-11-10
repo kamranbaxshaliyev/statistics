@@ -1,6 +1,5 @@
 package org.example.statistics.config;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +22,11 @@ public class DataInitializer {
 	private final ServerRepository serverRepository;
 	private final PlayerRepository playerRepository;
 
-	@Value("${data.init.file}")
-	private Resource dataFile;
+	@Value("${data.init.servers}")
+	private Resource dataServers;
+
+	@Value("${data.init.players}")
+	private Resource dataPlayers;
 
 	@PostConstruct
 	public void initData() throws IOException {
@@ -34,14 +36,16 @@ public class DataInitializer {
 		}
 
 		System.out.println("Initializing data from JSON...");
-		JsonNode root = objectMapper.readTree(dataFile.getInputStream());
-
-		List<Server> servers = objectMapper.convertValue(
-				root.get("servers"), objectMapper.getTypeFactory().constructCollectionType(List.class, Server.class));
+		List<Server> servers = objectMapper.readValue(
+				dataServers.getInputStream(),
+				objectMapper.getTypeFactory().constructCollectionType(List.class, Server.class)
+		);
 		serverRepository.saveAll(servers);
 
-		List<Player> players = objectMapper.convertValue(
-				root.get("players"), objectMapper.getTypeFactory().constructCollectionType(List.class, Player.class));
+		List<Player> players = objectMapper.readValue(
+				dataPlayers.getInputStream(),
+				objectMapper.getTypeFactory().constructCollectionType(List.class, Player.class)
+		);
 		playerRepository.saveAll(players);
 
 		System.out.println("Data initialization completed.");

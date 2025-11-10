@@ -7,7 +7,6 @@ import org.example.statistics.domain.Server;
 import org.example.statistics.repository.MatchRepository;
 import org.example.statistics.repository.PlayerRepository;
 import org.example.statistics.repository.ServerRepository;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +19,6 @@ import java.util.LinkedHashMap;
 import java.util.UUID;
 
 @Component
-@EnableScheduling
 @RequiredArgsConstructor
 public class MatchGeneratorJob {
 
@@ -55,8 +53,10 @@ public class MatchGeneratorJob {
 		}
 		while (p1.equals(p2));
 
-		int score1 = random.nextInt(21);
-		int score2 = random.nextInt(21);
+		int scoreBound = 21;
+		int score1 = random.nextInt(scoreBound);
+		int score2 = random.nextInt(scoreBound);
+
 		String winner = score1 >= score2 ? p1.getName() : p2.getName();
 
 		Map<String, Integer> scores = new LinkedHashMap<>();

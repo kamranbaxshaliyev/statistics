@@ -1,0 +1,5 @@
+[
+  { "name": "PlayerOne", "totalScore": 1200, "matchesPlayed": 10, "winRate": 60 },
+  { "name": "PlayerTwo", "totalScore": 1800, "matchesPlayed": 15, "winRate": 70 },
+  { "name": "PlayerThree", "totalScore": 900, "matchesPlayed": 8, "winRate": 40 }
+]
