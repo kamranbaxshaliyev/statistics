@@ -2,12 +2,11 @@ package org.example.statistics.controller.player;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.example.statistics.dto.player.PlayerStatsDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.Map;
 
 @Tag(name = "Player", description = "Operations related to players")
 @RequestMapping("/players")
@@ -18,5 +17,5 @@ public interface PlayerController
 			description = "Retrieve detailed statistics for the specified player by name."
 	)
 	@GetMapping("/{name}/stats")
-	ResponseEntity<Map<String, Object>> getStats(@PathVariable String name);
+	ResponseEntity<PlayerStatsDto> getStats(@PathVariable String name);
 }
