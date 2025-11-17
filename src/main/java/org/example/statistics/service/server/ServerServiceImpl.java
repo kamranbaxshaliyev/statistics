@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.example.statistics.domain.Match;
 import org.example.statistics.domain.Server;
 import org.example.statistics.dto.server.ServerStatsDto;
+import org.example.statistics.exception.EntityNotFoundException;
 import org.example.statistics.mapper.server.ServerMapper;
 import org.example.statistics.repository.MatchRepository;
 import org.example.statistics.repository.ServerRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -30,7 +32,13 @@ public class ServerServiceImpl implements ServerService {
 
 	@Override
 	public Server getServer(String endpoint) {
-		return serverRepository.findById(endpoint).orElse(null);
+		Optional<Server> optionalServer = serverRepository.findById(endpoint);
+
+		if (optionalServer.isEmpty()) {
+			throw new EntityNotFoundException("Server with endpoint " + endpoint + " not found");
+		}
+
+		return optionalServer.get();
 	}
 
 	@Override
@@ -44,7 +52,12 @@ public class ServerServiceImpl implements ServerService {
 
 	@Override
 	public ServerStatsDto getStats(String endpoint) {
-		Server server = serverRepository.findById(endpoint).orElse(null);
-		return serverMapper.toServerStatsDto(server);
+		Optional<Server> optionalServer = serverRepository.findById(endpoint);
+
+		if (optionalServer.isEmpty()) {
+			throw new EntityNotFoundException("Server with endpoint " + endpoint + " not found");
+		}
+
+		return serverMapper.toServerStatsDto(optionalServer.get());
 	}
 }

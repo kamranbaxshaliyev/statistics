@@ -18,22 +18,16 @@ public class ReportControllerImpl implements ReportController {
 
 	@Override
 	public ResponseEntity<List<Match>> getRecentMatches(Integer count) {
-		List<Match> matches = reportService.getRecentMatches(count);
-
-		return ResponseEntity.ok(matches);
+		return ResponseEntity.ok(reportService.getRecentMatches(count));
 	}
 
 	@Override
 	public ResponseEntity<List<Player>> getBestPlayers(Integer count) {
-		List<Player> players = reportService.getBestPlayers(count);
-
-		return ResponseEntity.ok(players);
+		return ResponseEntity.ok(reportService.getBestPlayers(count));
 	}
 
 	@Override
 	public ResponseEntity<List<Server>> getPopularServers(Integer count) {
-		List<Server> servers = reportService.getPopularServers(count);
-
-		return ResponseEntity.ok(servers);
+		return ResponseEntity.ok(reportService.getPopularServers(count));
 	}
 }

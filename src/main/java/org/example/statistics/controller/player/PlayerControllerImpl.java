@@ -13,8 +13,7 @@ public class PlayerControllerImpl implements PlayerController {
 	private final PlayerService playerService;
 
 	@Override
-	public ResponseEntity<PlayerStatsDto> getStats(String name) {
-		PlayerStatsDto playerStatsDto = playerService.getStats(name);
-		return ResponseEntity.ok(playerStatsDto);
+	public ResponseEntity<PlayerStatsDto> getStats(String playerName) {
+		return ResponseEntity.ok(playerService.getStats(playerName));
 	}
 }

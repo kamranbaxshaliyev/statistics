@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.example.statistics.domain.Match;
 import org.example.statistics.domain.Player;
 import org.example.statistics.dto.player.PlayerStatsDto;
+import org.example.statistics.exception.EntityNotFoundException;
 import org.example.statistics.mapper.player.PlayerMapper;
 import org.example.statistics.repository.MatchRepository;
 import org.example.statistics.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,16 +25,17 @@ public class PlayerServiceImpl implements PlayerService {
 	private final PlayerMapper playerMapper;
 
 	@Override
-	public PlayerStatsDto getStats(String name) {
-		Player player = playerRepository.findById(name).orElse(null);
+	public PlayerStatsDto getStats(String playerName) {
+		Optional<Player> optionalPlayer = playerRepository.findById(playerName);
 
-		if (player == null) {
-			return null;
+		if (optionalPlayer.isEmpty()) {
+			throw new EntityNotFoundException("Player with name " + playerName + " not found");
 		}
 
+		Player player = optionalPlayer.get();
 		PlayerStatsDto playerStatsDto = playerMapper.toPlayerStatsDto(player);
 
-		if (player.getMatchIds() != null && !player.getMatchIds().isEmpty()) {
+		if (!CollectionUtils.isEmpty(player.getMatchIds())) {
 			List<Match> recentMatches = player.getMatchIds().stream()
 					.map(matchRepository::findById)
 					.filter(Optional::isPresent)

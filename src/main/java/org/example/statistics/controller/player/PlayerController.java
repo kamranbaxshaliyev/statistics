@@ -16,6 +16,6 @@ public interface PlayerController
 			summary = "Get player statistics",
 			description = "Retrieve detailed statistics for the specified player by name."
 	)
-	@GetMapping("/{name}/stats")
-	ResponseEntity<PlayerStatsDto> getStats(@PathVariable String name);
+	@GetMapping("/{playerName}/stats")
+	ResponseEntity<PlayerStatsDto> getStats(@PathVariable String playerName);
 }

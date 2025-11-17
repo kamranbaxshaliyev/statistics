@@ -18,30 +18,21 @@ public class ServerControllerImpl implements ServerController {
 
 	@Override
 	public ResponseEntity<List<Server>> getServers() {
-		List<Server> servers = serverService.getServers();
-		return ResponseEntity.ok(servers);
+		return ResponseEntity.ok(serverService.getServers());
 	}
 
 	@Override
 	public ResponseEntity<Server> getServer(String endpoint) {
-		Server server = serverService.getServer(endpoint);
-
-		if (server == null) {
-			return ResponseEntity.notFound().build();
-		}
-
-		return ResponseEntity.ok(server);
+		return ResponseEntity.ok(serverService.getServer(endpoint));
 	}
 
 	@Override
 	public ResponseEntity<List<Match>> getMatches(String endpoint, String timestamp) {
-		List<Match> matches = serverService.getMatches(endpoint, timestamp);
-		return ResponseEntity.ok(matches);
+		return ResponseEntity.ok(serverService.getMatches(endpoint, timestamp));
 	}
 
 	@Override
 	public ResponseEntity<ServerStatsDto> getStats(String endpoint) {
-		ServerStatsDto stats = serverService.getStats(endpoint);
-		return ResponseEntity.ok(stats);
+		return ResponseEntity.ok(serverService.getStats(endpoint));
 	}
 }
