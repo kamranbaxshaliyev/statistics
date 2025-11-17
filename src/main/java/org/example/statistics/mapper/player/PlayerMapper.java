@@ -9,5 +9,6 @@ import org.mapstruct.Mapping;
 public interface PlayerMapper {
 
 	@Mapping(target = "winRate", expression = "java(player.getWinRate() + \"%\")")
+	@Mapping(target = "recentMatches", ignore = true)
 	PlayerStatsDto toPlayerStatsDto(Player player);
 }
