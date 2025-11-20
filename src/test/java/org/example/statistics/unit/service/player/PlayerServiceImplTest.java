@@ -87,7 +87,7 @@ class PlayerServiceImplTest {
 		assertThat(result.getRecentMatches()).hasSize(2);
 		assertThat(result.getRecentMatches()).containsExactly(testMatch1, testMatch2);
 
-		verify(playerRepository).findById("TestPlayer");
+		verify(playerRepository).findById(eq("TestPlayer"));
 		verify(playerMapper).toPlayerStatsDto(testPlayer);
 		verify(matchRepository, times(2)).findById(anyString());
 	}
@@ -109,7 +109,7 @@ class PlayerServiceImplTest {
 		assertThat(result.getName()).isEqualTo("TestPlayer");
 		assertThat(result.getRecentMatches()).isEmpty();
 
-		verify(playerRepository).findById("TestPlayer");
+		verify(playerRepository).findById(eq("TestPlayer"));
 		verify(playerMapper).toPlayerStatsDto(testPlayer);
 		verify(matchRepository, never()).findById(anyString());
 	}
@@ -130,7 +130,7 @@ class PlayerServiceImplTest {
 		assertThat(result).isNotNull();
 		assertThat(result.getRecentMatches()).isEmpty();
 
-		verify(playerRepository).findById("TestPlayer");
+		verify(playerRepository).findById(eq("TestPlayer"));
 		verify(playerMapper).toPlayerStatsDto(testPlayer);
 		verify(matchRepository, never()).findById(anyString());
 	}

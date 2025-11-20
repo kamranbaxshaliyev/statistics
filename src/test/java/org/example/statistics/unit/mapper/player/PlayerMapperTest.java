@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
@@ -59,7 +60,13 @@ class PlayerMapperTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("provideWinRateScenarios")
+	@CsvSource({
+			"0, 0%",
+			"25, 25%",
+			"50, 50%",
+			"75, 75%",
+			"100, 100%"
+	})
 	@DisplayName("Should correctly format different win rate values")
 	void toPlayerStatsDto_WithDifferentWinRates_ShouldFormatCorrectly(
 			int winRate,
@@ -72,17 +79,6 @@ class PlayerMapperTest {
 
 		// Then
 		assertThat(result.getWinRate()).isEqualTo(expectedFormatted);
-	}
-
-	private static Stream<Arguments> provideWinRateScenarios() {
-		return Stream.of(
-				Arguments.of(0, "0%"),
-				Arguments.of(25, "25%"),
-				Arguments.of(50, "50%"),
-				Arguments.of(75, "75%"),
-				Arguments.of(99, "99%"),
-				Arguments.of(100, "100%")
-		);
 	}
 
 	@Test
