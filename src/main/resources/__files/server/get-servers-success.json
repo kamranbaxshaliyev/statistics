@@ -1,0 +1,16 @@
+[
+  {
+    "endpoint": "eu-1.game.net",
+    "name": "Europe Alpha",
+    "region": "EU",
+    "matchIds": ["1", "2", "5"],
+    "rating": 4.5
+  },
+  {
+    "endpoint": "us-1.game.net",
+    "name": "US East",
+    "region": "US",
+    "matchIds": ["3", "4", "6"],
+    "rating": 4.7
+  }
+]
