@@ -1,0 +1,6 @@
+[
+  { "id": 1, "userName": "Admin", "userType": "ADMIN", "password": "admin" },
+  { "id": 2, "userName": "PlayerOne", "userType": "PLAYER", "password": "player1" },
+  { "id": 3, "userName": "PlayerTwo", "userType": "PLAYER", "password": "player2" },
+  { "id": 4, "userName": "PlayerThree", "userType": "PLAYER", "password": "player3" }
+]

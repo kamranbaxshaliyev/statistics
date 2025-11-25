@@ -8,6 +8,8 @@ import org.example.statistics.exception.EntityNotFoundException;
 import org.example.statistics.mapper.player.PlayerMapper;
 import org.example.statistics.repository.MatchRepository;
 import org.example.statistics.repository.PlayerRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -26,10 +28,13 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Override
 	public PlayerStatsDto getStats(String playerName) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String username = authentication.getName();
+
 		Optional<Player> optionalPlayer = playerRepository.findById(playerName);
 
-		if (optionalPlayer.isEmpty()) {
-			throw new EntityNotFoundException("Player with name " + playerName + " not found");
+		if(optionalPlayer.isEmpty() || !optionalPlayer.get().getName().equals(username)) {
+			throw new EntityNotFoundException("Bad request");
 		}
 
 		Player player = optionalPlayer.get();

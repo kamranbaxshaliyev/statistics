@@ -5,10 +5,13 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.example.statistics.domain.Player;
 import org.example.statistics.domain.Server;
+import org.example.statistics.domain.User;
 import org.example.statistics.repository.PlayerRepository;
 import org.example.statistics.repository.ServerRepository;
+import org.example.statistics.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -21,12 +24,17 @@ public class DataInitializer {
 	private final ObjectMapper objectMapper;
 	private final ServerRepository serverRepository;
 	private final PlayerRepository playerRepository;
+	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	@Value("${data.init.servers}")
 	private Resource dataServers;
 
 	@Value("${data.init.players}")
 	private Resource dataPlayers;
+
+	@Value("${data.init.users}")
+	private Resource dataUsers;
 
 	@PostConstruct
 	public void initData() throws IOException {
@@ -47,6 +55,18 @@ public class DataInitializer {
 				objectMapper.getTypeFactory().constructCollectionType(List.class, Player.class)
 		);
 		playerRepository.saveAll(players);
+
+		List<User> users = objectMapper.readValue(
+				dataUsers.getInputStream(),
+				objectMapper.getTypeFactory().constructCollectionType(List.class, User.class)
+		);
+
+		// Hash passwords before saving
+		for (User user : users) {
+			user.setPassword(passwordEncoder.encode(user.getPassword()));
+		}
+
+		userRepository.saveAll(users);
 
 		System.out.println("Data initialization completed.");
 	}
