@@ -14,10 +14,11 @@ public class JwtUtil {
 	private final Algorithm algorithm = Algorithm.HMAC256(SECRET);
 	private final long EXPIRATION_TIME = 1000 * 60 * 60;
 
-	public String generateToken(String username, String role) {
+	public String generateToken(String username, String role, String sessionId) {
 		return JWT.create()
 				.withSubject(username)
 				.withClaim("role", role)
+				.withClaim("sessionId", sessionId)
 				.withIssuedAt(new Date())
 				.withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
 				.sign(algorithm);
@@ -41,6 +42,10 @@ public class JwtUtil {
 
 	public String extractRole(String token) {
 		return decode(token).getClaim("role").asString();
+	}
+
+	public String extractSessionId(String token) {
+		return decode(token).getClaim("sessionId").asString();
 	}
 
 	public boolean isExpired(String token) {
