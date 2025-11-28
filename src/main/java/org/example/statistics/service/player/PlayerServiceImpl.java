@@ -30,10 +30,16 @@ public class PlayerServiceImpl implements PlayerService {
 	public PlayerStatsDto getStats(String playerName) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String username = authentication.getName();
+		boolean isAdmin = authentication.getAuthorities().stream()
+				.anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
 
 		Optional<Player> optionalPlayer = playerRepository.findById(playerName);
 
-		if(optionalPlayer.isEmpty() || !optionalPlayer.get().getName().equals(username)) {
+		if(optionalPlayer.isEmpty()) {
+			throw new EntityNotFoundException(isAdmin ? "Player not found" : "Bad request");
+		}
+
+		if(!isAdmin && !optionalPlayer.get().getName().equals(username)) {
 			throw new EntityNotFoundException("Bad request");
 		}
 
