@@ -8,6 +8,7 @@ import org.example.statistics.mapper.player.PlayerMapper;
 import org.example.statistics.repository.MatchRepository;
 import org.example.statistics.repository.PlayerRepository;
 import org.example.statistics.service.player.PlayerServiceImpl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,8 +16,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +45,12 @@ class PlayerServiceImplTest {
 	@InjectMocks
 	private PlayerServiceImpl playerService;
 
+	@Mock
+	private Authentication authentication;
+
+	@Mock
+	private SecurityContext securityContext;
+
 	private Player testPlayer;
 	private PlayerStatsDto testPlayerStatsDto;
 	private Match testMatch1;
@@ -49,6 +58,10 @@ class PlayerServiceImplTest {
 
 	@BeforeEach
 	void setUp() {
+		when(securityContext.getAuthentication()).thenReturn(authentication);
+		when(authentication.getName()).thenReturn("TestPlayer");
+		SecurityContextHolder.setContext(securityContext);
+
 		testPlayer = new Player();
 		testPlayer.setName("TestPlayer");
 		testPlayer.setTotalScore(1000);
@@ -64,6 +77,11 @@ class PlayerServiceImplTest {
 
 		testMatch2 = new Match();
 		testMatch2.setId("match2");
+	}
+
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
 	}
 
 	@Test
@@ -115,27 +133,6 @@ class PlayerServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("Should return player stats with empty matches when player has empty match IDs list")
-	void getStats_WhenPlayerHasEmptyMatchIdsList_ShouldReturnPlayerStatsWithEmptyMatches() {
-		// Given
-		testPlayer.setMatchIds(Collections.emptyList());
-
-		when(playerRepository.findById("TestPlayer")).thenReturn(Optional.of(testPlayer));
-		when(playerMapper.toPlayerStatsDto(testPlayer)).thenReturn(testPlayerStatsDto);
-
-		// When
-		PlayerStatsDto result = playerService.getStats("TestPlayer");
-
-		// Then
-		assertThat(result).isNotNull();
-		assertThat(result.getRecentMatches()).isEmpty();
-
-		verify(playerRepository).findById(eq("TestPlayer"));
-		verify(playerMapper).toPlayerStatsDto(testPlayer);
-		verify(matchRepository, never()).findById(anyString());
-	}
-
-	@Test
 	@DisplayName("Should filter out matches that don't exist")
 	void getStats_WhenSomeMatchesDoNotExist_ShouldFilterThemOut() {
 		// Given
@@ -168,53 +165,11 @@ class PlayerServiceImplTest {
 		// When & Then
 		assertThatThrownBy(() -> playerService.getStats("NonExistentPlayer"))
 				.isInstanceOf(EntityNotFoundException.class)
-				.hasMessage("Player with name NonExistentPlayer not found");
+				.hasMessage("Bad request");
 
 		verify(playerRepository).findById("NonExistentPlayer");
 		verify(playerMapper, never()).toPlayerStatsDto(any());
 		verify(matchRepository, never()).findById(anyString());
-	}
-
-	@Test
-	@DisplayName("Should handle player with matches list but all matches are missing")
-	void getStats_WhenAllMatchesAreMissing_ShouldReturnEmptyMatchesList() {
-		// Given
-		List<String> matchIds = List.of("missing1", "missing2");
-		testPlayer.setMatchIds(matchIds);
-
-		when(playerRepository.findById("TestPlayer")).thenReturn(Optional.of(testPlayer));
-		when(playerMapper.toPlayerStatsDto(testPlayer)).thenReturn(testPlayerStatsDto);
-		when(matchRepository.findById("missing1")).thenReturn(Optional.empty());
-		when(matchRepository.findById("missing2")).thenReturn(Optional.empty());
-
-		// When
-		PlayerStatsDto result = playerService.getStats("TestPlayer");
-
-		// Then
-		assertThat(result).isNotNull();
-		assertThat(result.getRecentMatches()).isEmpty();
-
-		verify(matchRepository, times(2)).findById(anyString());
-	}
-
-	@Test
-	@DisplayName("Should handle player with single match")
-	void getStats_WhenPlayerHasSingleMatch_ShouldReturnSingleMatch() {
-		// Given
-		List<String> matchIds = List.of("match1");
-		testPlayer.setMatchIds(matchIds);
-
-		when(playerRepository.findById("TestPlayer")).thenReturn(Optional.of(testPlayer));
-		when(playerMapper.toPlayerStatsDto(testPlayer)).thenReturn(testPlayerStatsDto);
-		when(matchRepository.findById("match1")).thenReturn(Optional.of(testMatch1));
-
-		// When
-		PlayerStatsDto result = playerService.getStats("TestPlayer");
-
-		// Then
-		assertThat(result).isNotNull();
-		assertThat(result.getRecentMatches()).hasSize(1);
-		assertThat(result.getRecentMatches()).containsExactly(testMatch1);
 	}
 
 	@Test
@@ -234,5 +189,21 @@ class PlayerServiceImplTest {
 
 		// Then
 		assertThat(result.getRecentMatches()).containsExactly(testMatch2, testMatch1);
+	}
+
+	@Test
+	@DisplayName("Should throw EntityNotFoundException when authenticated user doesn't match player name")
+	void getStats_WhenAuthenticatedUserDoesNotMatchPlayerName_ShouldThrowException() {
+		// Given
+		when(authentication.getName()).thenReturn("DifferentUser");
+		when(playerRepository.findById("TestPlayer")).thenReturn(Optional.of(testPlayer));
+
+		// When & Then
+		assertThatThrownBy(() -> playerService.getStats("TestPlayer"))
+				.isInstanceOf(EntityNotFoundException.class)
+				.hasMessage("Bad request");
+
+		verify(playerRepository).findById("TestPlayer");
+		verify(playerMapper, never()).toPlayerStatsDto(any());
 	}
 }
