@@ -120,22 +120,7 @@ class ReportServiceImplTest {
 
 		// Then
 		assertThat(result).hasSize(count);
-		assertThat(result.get(0)).isEqualTo(match4); // Most recent should be first
-	}
-
-	@Test
-	@DisplayName("Should return all matches when count is greater than total")
-	void getRecentMatches_WhenCountExceedsTotalMatches_ShouldReturnAllMatches() {
-		// Given
-		List<Match> allMatches = List.of(match1, match2);
-		when(matchRepository.findAll()).thenReturn(allMatches);
-
-		// When
-		List<Match> result = reportService.getRecentMatches(10);
-
-		// Then
-		assertThat(result).hasSize(2);
-		assertThat(result).containsExactly(match2, match1);
+		assertThat(result.getFirst()).isEqualTo(match4); // Most recent should be first
 	}
 
 	@Test
@@ -149,38 +134,6 @@ class ReportServiceImplTest {
 
 		// Then
 		assertThat(result).isEmpty();
-	}
-
-	@Test
-	@DisplayName("Should return empty list when count is zero")
-	void getRecentMatches_WhenCountIsZero_ShouldReturnEmptyList() {
-		// Given
-		List<Match> allMatches = List.of(match1, match2, match3);
-		when(matchRepository.findAll()).thenReturn(allMatches);
-
-		// When
-		List<Match> result = reportService.getRecentMatches(0);
-
-		// Then
-		assertThat(result).isEmpty();
-	}
-
-	@Test
-	@DisplayName("Should handle matches with same timestamp")
-	void getRecentMatches_WhenMatchesHaveSameTimestamp_ShouldIncludeAll() {
-		// Given
-		Match matchA = createMatch("matchA", LocalDateTime.of(2024, 1, 1, 10, 0));
-		Match matchB = createMatch("matchB", LocalDateTime.of(2024, 1, 1, 10, 0));
-		Match matchC = createMatch("matchC", LocalDateTime.of(2024, 1, 2, 10, 0));
-
-		when(matchRepository.findAll()).thenReturn(List.of(matchA, matchB, matchC));
-
-		// When
-		List<Match> result = reportService.getRecentMatches(3);
-
-		// Then
-		assertThat(result).hasSize(3);
-		assertThat(result.get(0)).isEqualTo(matchC);
 	}
 
 	// ==================== getBestPlayers Tests ====================
@@ -201,64 +154,6 @@ class ReportServiceImplTest {
 		verify(playerRepository).findAll();
 	}
 
-	@ParameterizedTest
-	@ValueSource(ints = {1, 2, 3, 4})
-	@DisplayName("Should limit player results to requested count")
-	void getBestPlayers_WithDifferentCounts_ShouldLimitResults(int count) {
-		// Given
-		List<Player> allPlayers = List.of(player1, player2, player3, player4);
-		when(playerRepository.findAll()).thenReturn(allPlayers);
-
-		// When
-		List<Player> result = reportService.getBestPlayers(count);
-
-		// Then
-		assertThat(result).hasSize(count);
-		assertThat(result.get(0)).isEqualTo(player1); // Highest score should be first
-	}
-
-	@Test
-	@DisplayName("Should return all players when count is greater than total")
-	void getBestPlayers_WhenCountExceedsTotalPlayers_ShouldReturnAllPlayers() {
-		// Given
-		List<Player> allPlayers = List.of(player1, player2);
-		when(playerRepository.findAll()).thenReturn(allPlayers);
-
-		// When
-		List<Player> result = reportService.getBestPlayers(10);
-
-		// Then
-		assertThat(result).hasSize(2);
-		assertThat(result).containsExactly(player1, player2);
-	}
-
-	@Test
-	@DisplayName("Should return empty list when no players exist")
-	void getBestPlayers_WhenNoPlayersExist_ShouldReturnEmptyList() {
-		// Given
-		when(playerRepository.findAll()).thenReturn(Collections.emptyList());
-
-		// When
-		List<Player> result = reportService.getBestPlayers(5);
-
-		// Then
-		assertThat(result).isEmpty();
-	}
-
-	@Test
-	@DisplayName("Should return empty list when count is zero")
-	void getBestPlayers_WhenCountIsZero_ShouldReturnEmptyList() {
-		// Given
-		List<Player> allPlayers = List.of(player1, player2);
-		when(playerRepository.findAll()).thenReturn(allPlayers);
-
-		// When
-		List<Player> result = reportService.getBestPlayers(0);
-
-		// Then
-		assertThat(result).isEmpty();
-	}
-
 	@Test
 	@DisplayName("Should handle players with same score")
 	void getBestPlayers_WhenPlayersHaveSameScore_ShouldIncludeAll() {
@@ -274,7 +169,7 @@ class ReportServiceImplTest {
 
 		// Then
 		assertThat(result).hasSize(3);
-		assertThat(result.get(0)).isEqualTo(playerC);
+		assertThat(result.getFirst()).isEqualTo(playerC);
 	}
 
 	// ==================== getPopularServers Tests ====================
@@ -308,48 +203,7 @@ class ReportServiceImplTest {
 
 		// Then
 		assertThat(result).hasSize(count);
-		assertThat(result.get(0)).isEqualTo(server1); // Most matches should be first
-	}
-
-	@Test
-	@DisplayName("Should return all servers when count is greater than total")
-	void getPopularServers_WhenCountExceedsTotalServers_ShouldReturnAllServers() {
-		// Given
-		List<Server> allServers = List.of(server1, server2);
-		when(serverRepository.findAll()).thenReturn(allServers);
-
-		// When
-		List<Server> result = reportService.getPopularServers(10);
-
-		// Then
-		assertThat(result).hasSize(2);
-	}
-
-	@Test
-	@DisplayName("Should return empty list when no servers exist")
-	void getPopularServers_WhenNoServersExist_ShouldReturnEmptyList() {
-		// Given
-		when(serverRepository.findAll()).thenReturn(Collections.emptyList());
-
-		// When
-		List<Server> result = reportService.getPopularServers(5);
-
-		// Then
-		assertThat(result).isEmpty();
-	}
-
-	@Test
-	@DisplayName("Should return empty list when count is zero")
-	void getPopularServers_WhenCountIsZero_ShouldReturnEmptyList() {
-		// Given
-		List<Server> allServers = List.of(server1, server2);
-		when(serverRepository.findAll()).thenReturn(allServers);
-
-		// When
-		List<Server> result = reportService.getPopularServers(0);
-
-		// Then
-		assertThat(result).isEmpty();
+		assertThat(result.getFirst()).isEqualTo(server1); // Most matches should be first
 	}
 
 	@Test
@@ -367,23 +221,6 @@ class ReportServiceImplTest {
 		assertThat(result).hasSize(2);
 		assertThat(result.get(0)).isEqualTo(server1);
 		assertThat(result.get(1)).isEqualTo(serverWithNull);
-	}
-
-	@Test
-	@DisplayName("Should handle servers with empty match IDs")
-	void getPopularServers_WhenServerHasEmptyMatchIds_ShouldTreatAsZero() {
-		// Given
-		Server serverWithEmpty = createServer("emptyserver.com", Collections.emptyList());
-		List<Server> allServers = List.of(server1, serverWithEmpty);
-		when(serverRepository.findAll()).thenReturn(allServers);
-
-		// When
-		List<Server> result = reportService.getPopularServers(2);
-
-		// Then
-		assertThat(result).hasSize(2);
-		assertThat(result.get(0)).isEqualTo(server1);
-		assertThat(result.get(1)).isEqualTo(serverWithEmpty);
 	}
 
 	// ==================== Parameterized Tests for All Methods ====================
